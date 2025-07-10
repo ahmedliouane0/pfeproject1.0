@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <!-- Main Content -->
+  <div class="flex-1 p-8">
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-xl shadow-lg p-8 backdrop-blur-sm bg-white/90">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800 border-b pb-4">Account Information</h1>
+        <div class="space-y-6">
+          <!-- Profile Summary Card -->
+          <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="bg-blue-600 rounded-full p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold text-gray-800">{{ user.get_full_name|default:user.username }}</h2>
+                <p class="text-gray-600">Account Details</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Details -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p class="text-sm text-gray-600 mb-1">Username</p>
+                <p class="font-semibold text-gray-800">{{ user.username }}</p>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p class="text-sm text-gray-600 mb-1">Email Address</p>
+                <p class="font-semibold text-gray-800">{{ user.email }}</p>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p class="text-sm text-gray-600 mb-1">First Name</p>
+                <p class="font-semibold text-gray-800">{{ user.first_name|default:"Not set" }}</p>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <p class="text-sm text-gray-600 mb-1">Last Name</p>
+                <p class="font-semibold text-gray-800">{{ user.last_name|default:"Not set" }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-between items-center pt-6 border-t">
+          </div>
+
+          <br />
+          <hr />
+          <a href="{% url 'delete_account' %}" class="text-red-600 hover:text-red-700 font-medium">
+            Delete Account
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

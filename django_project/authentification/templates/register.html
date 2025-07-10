@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <title>Registration Form</title>
+    <style>
+      :root {
+        --primary-blue: #0056b3;
+        --light-blue: #007bff;
+      }
+
+      body {
+        background: linear-gradient(
+          rgba(0, 86, 179, 0.1),
+          rgba(0, 123, 255, 0.1)
+        );
+        min-height: 100vh;
+      }
+
+      .navbar {
+        background-color: rgba(0, 86, 179, 0.95) !important;
+      }
+
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 86, 179, 0.1) !important;
+      }
+
+      .form-control:focus {
+        border-color: var(--light-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        padding: 10px 20px;
+        font-weight: 500;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--light-blue);
+        border-color: var(--light-blue);
+      }
+
+      h1 span {
+        color: var(--primary-blue) !important;
+      }
+
+      h3 {
+        color: var(--primary-blue);
+        font-size: 1.5rem;
+      }
+
+      label {
+        color: var(--primary-blue);
+        font-weight: 500;
+      }
+
+      hr {
+        border-color: rgba(0, 86, 179, 0.1);
+      }
+
+      a {
+        color: var(--light-blue);
+      }
+
+      a:hover {
+        color: var(--primary-blue);
+        text-decoration: none;
+      }
+
+      .footer-custom {
+        background-color: var(--primary-blue);
+        color: white;
+        margin-top: 3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+          <svg
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 150 40"
+              width="150" 
+              height="40" 
+              class="d-inline-block align-text-top"
+            >
+              <!-- Background Circle -->
+              <circle cx="20" cy="20" r="16" fill="#ffffff"/>
+              
+              <!-- Letter G stylized with AI elements -->
+              <path d="M20,8 C14,8 10,12 10,20 C10,28 14,32 20,32 C26,32 30,28 30,20 L24,20 L24,24 L20,24 C18,24 16,22 16,20 C16,18 18,16 20,16 L24,16 L24,20 L30,20" 
+                    fill="none" stroke="#0056b3" stroke-width="2.4" stroke-linecap="round" />
+              
+              <!-- Digital circuit lines representing AI -->
+              <line x1="22" y1="12" x2="26" y2="12" stroke="#0056b3" stroke-width="1" />
+              <line x1="22" y1="28" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+              <line x1="26" y1="12" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+              
+              <!-- Text -->
+              <text x="40" y="24" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Gramatica</text>
+              <text x="40" y="32" font-family="Arial, sans-serif" font-size="5" fill="#ffffff">AI Language Assistant</text>
+            </svg>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+      <!-- Registration form -->
+      <form class="col-6 mx-auto card p-3 shadow-lg" method="post">
+        {% csrf_token %}
+        <!-- CSRF token for security -->
+
+        <!-- Registration form heading -->
+        <h1 class="text-center"><span>Register</span></h1>
+        <h3>Create an Account</h3>
+        <hr />
+
+        <!-- Display error/success messages -->
+        {% if messages %} {% for message in messages %}
+        <div
+          class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}"
+          role="alert"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %}
+
+        <!-- First Name input field -->
+        <div class="form-group">
+          <label for="first_name">First Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="first_name"
+            name="first_name"
+            placeholder="Enter First Name"
+            required
+          />
+        </div>
+
+        <!-- Last Name input field -->
+        <div class="form-group">
+          <label for="last_name">Last Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="last_name"
+            name="last_name"
+            placeholder="Enter Last Name"
+            required
+          />
+        </div>
+
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            placeholder="Enter Email"
+            required
+          />
+        </div>
+
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="Enter Username"
+            required
+          />
+        </div>
+
+        <!-- Password input field -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="Enter Password"
+            required
+          />
+        </div>
+
+        <!-- Confirm Password input field -->
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="confirm_password"
+            name="confirm_password"
+            placeholder="Confirm Password"
+            required
+          />
+        </div>
+
+        <!-- Link to login page for users who already have an account -->
+        <p>Already have an account? <a href="/login/">Login</a></p>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary btn-block">
+          Register
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>About Us</h5>
+            <p>
+              We're dedicated to providing the best service to our customers.
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <h5>Connect With Us</h5>
+            <div class="social-links">
+              <a href="#" class="text-light me-3"
+                ><i class="fab fa-facebook"></i
+              ></a>
+              <a href="#" class="text-light me-3"
+                ><i class="fab fa-twitter"></i
+              ></a>
+              <a href="#" class="text-light me-3"
+                ><i class="fab fa-linkedin"></i
+              ></a>
+              <a href="#" class="text-light"
+                ><i class="fab fa-instagram"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1)" />
+        <div class="text-center">
+          <p class="mb-0">&copy; 2025 Your Company. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

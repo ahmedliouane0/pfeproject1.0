@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>{% block title %}Gramatica{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+</head>
+<body class="bg-gray-100">
+
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-48 bg-blue-600 text-white min-h-screen relative">
+        <div class="p-4">
+            <!-- Logo added here -->
+            <div class="mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 40" class="h-10">
+                  <!-- Background Circle -->
+                  <circle cx="20" cy="20" r="16" fill="#ffffff"/>
+                  
+                  <!-- Letter G stylized with AI elements -->
+                  <path d="M20,8 C14,8 10,12 10,20 C10,28 14,32 20,32 C26,32 30,28 30,20 L24,20 L24,24 L20,24 C18,24 16,22 16,20 C16,18 18,16 20,16 L24,16 L24,20 L30,20" 
+                        fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linecap="round" />
+                  
+                  <!-- Digital circuit lines representing AI -->
+                  <line x1="22" y1="12" x2="26" y2="12" stroke="#2563eb" stroke-width="1" />
+                  <line x1="22" y1="28" x2="26" y2="28" stroke="#2563eb" stroke-width="1" />
+                  <line x1="26" y1="12" x2="26" y2="28" stroke="#2563eb" stroke-width="1" />
+                  
+                  <!-- Text -->
+                  <text x="40" y="24" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">Gramatica</text>
+                  <text x="40" y="32" font-family="Arial, sans-serif" font-size="10" fill="#ffffff">AI Language Assistant</text>
+                </svg>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm">Logged in as:</p>
+                <p class="font-bold">{{ request.user.username }}</p>
+            </div>
+        </div>
+        <nav class="mt-8 space-y-2">
+            
+            <a href="{% url 'generate_article' %}" class="flex items-center py-3 px-4 hover:bg-blue-500 rounded-lg">
+                <!-- Icon -->
+                <svg class="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"/>
+                </svg>
+                <span class="font-medium">Generate Article</span>
+            </a>
+            <a href="{% url 'article_history' %}" class="flex items-center py-3 px-4 hover:bg-blue-500 rounded-lg">
+                <!-- History Time Icon -->
+                <svg class="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                </svg>
+                <span class="font-medium">Article History</span>
+            </a>
+            <a href="{% url 'account' %}" class="flex items-center py-3 px-4 hover:bg-blue-500 rounded-lg">
+                <!-- Icon -->
+                <svg class="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+                </svg>
+                <span class="font-medium">Account</span>
+            </a>
+        </nav>
+
+        <div class="absolute bottom-0 left-0 w-full p-4 bg-blue-700">
+            <a href="{% url 'logout' %}" class="flex items-center py-3 px-4 hover:bg-blue-500 rounded-lg">
+                <svg class="h-5 w-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"/>
+                </svg>
+                <span class="font-medium">Logout</span>
+                
+            </a>
+            <p class="text-xs mt-2">{{ request.user.email }}</p>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="flex-1 p-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+</div>
+
+</body>
+</html>

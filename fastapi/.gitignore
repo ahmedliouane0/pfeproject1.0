@@ -1,0 +1,40 @@
+# Byte-compiled / Python cache
+__pycache__/
+*.py[cod]
+*.so
+models/fasttext/lid.176.bin
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.python-version
+
+# Environment variables
+.env
+.env.*
+
+# Logs and metadata
+*.log
+*.pid
+*.db
+*.sqlite3
+
+# Large model or data files
+*.bin
+*.pt
+*.pkl
+*.h5
+*.ckpt
+*.tar
+*.zip
+models/
+downloads/
+checkpoints/
+
+# FastAPI specific folders (if used)
+instance/
+uploads/
+staticfiles/
+tmp/

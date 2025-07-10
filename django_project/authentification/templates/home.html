@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gramatica - AI Language Translation</title>
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-blue: #0056b3;
+        --light-blue: #007bff;
+      }
+
+      .cover-container {
+        /* Changed from 100vh to a more reasonable height */
+        height: 80vh;
+        min-height: 500px;
+        background: linear-gradient(
+            rgba(0, 86, 179, 0.9),
+            rgba(0, 123, 255, 0.8)
+          ),
+          url("https://source.unsplash.com/random/1920x1080/?blue,sky")
+            center/cover no-repeat;
+        color: white;
+        /* Adding padding to accommodate fixed navbar */
+        padding-top: 80px;
+      }
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--primary-blue);
+      }
+      .btn-outline-light:hover {
+        background-color: var(--light-blue);
+        border-color: var(--light-blue);
+      }
+      .navbar {
+        background-color: rgba(0, 86, 179, 0.95) !important;
+      }
+      .features-section {
+        background-color: white;
+        /* Added padding to create spacing */
+        padding: 60px 0;
+      }
+      .footer-custom {
+        background-color: var(--primary-blue);
+        color: white;
+      }
+      .btn-primary {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+      }
+      .btn-primary:hover {
+        background-color: var(--light-blue);
+        border-color: var(--light-blue);
+      }
+      /* Added spacing between buttons */
+      .btn-spacing {
+        margin-right: 10px;
+      }
+      /* Fixed social links display */
+      .social-links a {
+        display: inline-block;
+        margin-right: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+          <!-- Gramatica logo -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 150 40"
+            width="150" 
+            height="40" 
+            class="d-inline-block align-text-top"
+          >
+            <!-- Background Circle -->
+            <circle cx="20" cy="20" r="16" fill="#ffffff"/>
+            
+            <!-- Letter G stylized with AI elements -->
+            <path d="M20,8 C14,8 10,12 10,20 C10,28 14,32 20,32 C26,32 30,28 30,20 L24,20 L24,24 L20,24 C18,24 16,22 16,20 C16,18 18,16 20,16 L24,16 L24,20 L30,20" 
+                  fill="none" stroke="#0056b3" stroke-width="2.4" stroke-linecap="round" />
+            
+            <!-- Digital circuit lines representing AI -->
+            <line x1="22" y1="12" x2="26" y2="12" stroke="#0056b3" stroke-width="1" />
+            <line x1="22" y1="28" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+            <line x1="26" y1="12" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+            
+            <!-- Text -->
+            <text x="40" y="24" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Gramatica</text>
+            <text x="40" y="32" font-family="Arial, sans-serif" font-size="5" fill="#ffffff">AI Language Translation</text>
+          </svg>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'home' %}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#aboutModal">About</a>
+            </li>
+            
+            {% if request.session.username %}
+            <li class="nav-item">
+              <span class="nav-link">Welcome, <strong>{{ request.session.username }}</strong></span>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login_page' %}">Login</a>
+            </li>
+            {% endif %}
+          </ul> 
+        </div> 
+      </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <div class="cover-container d-flex align-items-center">
+      <div class="container text-center">
+        <div class="hero-logo mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 150 40"
+            width="400" 
+            height="106" 
+            class="d-inline-block"
+          >
+            <!-- Background Circle -->
+            <circle cx="20" cy="20" r="16" fill="#ffffff"/>
+            
+            <!-- Letter G stylized with AI elements -->
+            <path d="M20,8 C14,8 10,12 10,20 C10,28 14,32 20,32 C26,32 30,28 30,20 L24,20 L24,24 L20,24 C18,24 16,22 16,20 C16,18 18,16 20,16 L24,16 L24,20 L30,20" 
+                  fill="none" stroke="#0056b3" stroke-width="2.4" stroke-linecap="round" />
+            
+            <!-- Digital circuit lines representing AI -->
+            <line x1="22" y1="12" x2="26" y2="12" stroke="#0056b3" stroke-width="1" />
+            <line x1="22" y1="28" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+            <line x1="26" y1="12" x2="26" y2="28" stroke="#0056b3" stroke-width="1" />
+            
+            <!-- Text -->
+            <text x="40" y="24" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Gramatica</text>
+            <text x="40" y="32" font-family="Arial, sans-serif" font-size="5" fill="#ffffff">AI Language Translation</text>
+          </svg>
+        </div>
+        <p class="lead mb-5">
+          Transform your language experience with AI-powered translation solutions.
+        </p>
+        <div class="d-flex justify-content-center">
+          <a href="{% url 'login_page' %}" class="btn btn-primary btn-lg px-4 btn-spacing">Get Started</a>
+          <a href="#" class="btn btn-outline-light btn-lg px-4" data-toggle="modal" data-target="#learnMoreModal">Learn More</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learn More Modal -->
+    <div class="modal fade" id="learnMoreModal" tabindex="-1" role="dialog" aria-labelledby="learnMoreModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="learnMoreModalLabel">About Gramatica</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Gramatica is an advanced AI-powered language translation platform that helps you:</p>
+            <ul>
+              <li>Generate high-quality multilingual content</li>
+              <li>Detect and correct translation errors automatically</li>
+              <li>Maintain context and meaning across languages</li>
+              <li>Save time with our efficient translation tools</li>
+            </ul>
+            <p>Our cutting-edge technology ensures accurate and natural-sounding translations while preserving the original message's intent and style.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="aboutModalLabel">About Gramatica</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h6>Our Mission</h6>
+            <p>At Gramatica, we're committed to breaking down language barriers and making communication seamless across different cultures and languages.</p>
+            
+            <h6>What We Do</h6>
+            <p>We provide cutting-edge AI-powered translation services that help individuals and businesses:</p>
+            <ul>
+              <li>Create accurate and natural-sounding translations</li>
+              <li>Maintain the original context and meaning</li>
+              <li>Save time and resources</li>
+              <li>Communicate effectively across language barriers</li>
+            </ul>
+
+            <h6>Our Technology</h6>
+            <p>Powered by advanced artificial intelligence and machine learning algorithms, our platform delivers high-quality translations while continuously learning and improving to better serve our users.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+      <div class="container">
+        <div class="row text-center">
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>Generate Articles</h3>
+            <p class="text-muted">
+              Create flawless multilingual content with our AI-powered translation tools.
+            </p>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon">
+              <i class="fas fa-search"></i>
+            </div>
+            <h3>Detect Errors</h3>
+            <p class="text-muted">
+              Our AI instantly identifies inconsistencies and mistakes in translations.
+            </p>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Correct Translations</h3>
+            <p class="text-muted">
+              Automatically fix translation errors while preserving context and meaning.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom py-4">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>About Us</h5>
+            <p>
+              We're dedicated to breaking language barriers through cutting-edge AI translation technology.
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <h5>Connect With Us</h5>
+            <div class="social-links">
+              <a href="#" class="text-light">
+                <i class="fab fa-facebook"></i>
+              </a>
+              <a href="#" class="text-light">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#" class="text-light">
+                <i class="fab fa-linkedin"></i>
+              </a>
+              <a href="#" class="text-light">
+                <i class="fab fa-instagram"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.1)" />
+        <div class="text-center">
+          <p class="mb-0">&copy; 2025 Gramatica. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

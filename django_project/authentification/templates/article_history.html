@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<!-- Add Font Awesome CDN in the head section -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Add this script at the top of the content block -->
+<script>
+    // Prevent back button navigation
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+        history.go(1);
+    };
+</script>
+
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    {% if messages %}
+      <div id="message-container" class="mb-6">
+        {% for message in messages %}
+          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative transition-opacity duration-500" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <script>
+        // Auto-hide flash messages after 3 seconds
+        setTimeout(function () {
+          const container = document.getElementById('message-container');
+          if (container) {
+            container.style.opacity = '0';
+            setTimeout(() => container.remove(), 500); // remove from DOM after fade-out
+          }
+        }, 3000);
+      </script>
+    {% endif %}
+    <!-- Page Title -->
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-500">{{ title }}</h1>
+
+    <!-- Filter Form -->
+    <div class="bg-white rounded-lg shadow-md mb-8 overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <div class="bg-blue-600 text-white px-5 py-4">
+            <h5 class="font-medium">{% trans 'Filter Articles' %}</h5>
+        </div>
+        <div class="p-5">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">{% trans 'Subject' %}</label>
+                    <input type="text" id="subject" name="subject" value="{{ subject }}" placeholder="{% trans 'Enter a Subject' %}" class="w-full rounded-md border-2 border-gray-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm p-2">
+                </div>
+                <div>
+                    <label for="keyword" class="block text-sm font-medium text-gray-700 mb-1">{% trans 'Keyword' %}</label>
+                    <input type="text" id="keyword" name="keyword" value="{{ keyword }}" placeholder="{% trans 'Enter a keyword' %}" class="w-full rounded-md border-2 border-gray-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm p-2">
+                </div>
+                <div>
+                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">{% trans 'From Date' %}</label>
+                    <input type="date" id="date_from" name="date_from" value="{{ date_from }}" class="w-full rounded-md border-2 border-gray-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm p-2">
+                </div>
+                <div>
+                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">{% trans 'To Date' %}</label>
+                    <input type="date" id="date_to" name="date_to" value="{{ date_to }}" class="w-full rounded-md border-2 border-gray-800 focus:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm p-2">
+                </div>
+                <div class="md:col-span-4 flex space-x-3 mt-2">
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-300 hover:-translate-y-1 hover:shadow-md">
+                        {% trans 'Apply Filters' %}
+                    </button>
+                    <a href="{% url 'article_history' %}" class="px-4 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 transition duration-300 hover:-translate-y-1 hover:shadow-md">
+                        {% trans 'Clear Filters' %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Articles Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-blue-600 text-white">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Subject' %}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Keyword' %}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Created On' %}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Modified On' %}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Source Language' %}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for article in articles %}
+                    <tr class="hover:bg-blue-50 transition-colors duration-200">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ article.subject|truncatechars:50 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ article.keyword }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ article.créer_le|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ article.modifier_le|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ article.source_language.nom }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'view_article' article.id %}" 
+                                 class="bg-green-500 text-white rounded-full px-3 py-1 flex items-center hover:bg-green-600 transition hover:-translate-y-1 duration-300">
+                                 <i class="fas fa-pencil-alt"></i>
+                                </a>
+
+                                <button type="button" onclick="openDeleteModal('deleteModal{{ article.id }}')" class="bg-red-500 text-white rounded-full px-3 py-1 flex items-center hover:bg-red-600 transition hover:-translate-y-1 duration-300">
+                                     <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+
+                            <!-- Delete Modal -->
+                            <div id="deleteModal{{ article.id }}" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+                                <div class="bg-white rounded-lg shadow-xl sm:max-w-lg w-full">
+                                    <div class="bg-blue-600 px-4 py-3 text-white">
+                                        <h3 class="text-lg font-medium">{% trans 'Confirm Deletion' %}</h3>
+                                    </div>
+                                    <div class="px-4 py-5">
+                                        <p>{% trans 'Are you sure you want to delete this article?' %}</p>
+                                        <p class="mt-2"><strong>{% trans 'Subject' %}:</strong> {{ article.subject|truncatechars:100 }}</p>
+                                        <p class="mt-2"><strong>{% trans 'Keyword' %}:</strong> {{ article.keyword|truncatechars:100 }}</p>
+                                    </div>
+                                    <div class="bg-gray-50 px-4 py-3 flex justify-end">
+                                        <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600" onclick="closeDeleteModal('deleteModal{{ article.id }}')">{% trans 'Cancel' %}</button>
+                                        <form action="{% url 'article_delete' article.id %}" method="post" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">{% trans 'Delete' %}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-10 text-gray-500 italic">{% trans 'No articles found.' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if articles.has_other_pages %}
+    <div class="flex justify-center mt-6">
+        <nav class="inline-flex rounded-md shadow">
+            {% if articles.has_previous %}
+            <a href="?page={{ articles.previous_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if subject %}&subject={{ subject }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100">{% trans 'Previous' %}</a>
+            {% endif %}
+            {% for page_num in articles.paginator.page_range %}
+                {% if page_num == articles.number %}
+                <span class="px-4 py-2 bg-blue-500 text-white border border-blue-600 text-sm font-medium">{{ page_num }}</span>
+                {% else %}
+                <a href="?page={{ page_num }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if subject %}&subject={{ subject }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100">{{ page_num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if articles.has_next %}
+            <a href="?page={{ articles.next_page_number }}{% if keyword %}&keyword={{ keyword }}{% endif %}{% if subject %}&subject={{ subject }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100">{% trans 'Next' %}</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- JS to handle modal opening/closing and AJAX operations -->
+<script>
+// Delete modal operations
+function openDeleteModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function closeDeleteModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+</script>
+{% endblock %}

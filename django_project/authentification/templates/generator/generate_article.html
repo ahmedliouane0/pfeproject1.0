@@ -1,0 +1,54 @@
+<!-- generate_article.html -->
+{% extends "base.html" %}
+
+{% block title %}Generate Article{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+    <h1 class="text-2xl font-bold mb-6">Generate an Article</h1>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-md">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label for="word" class="block text-sm font-medium text-gray-700">{{ form.word.label }} *</label>
+            {{ form.word }}
+            {% if form.word.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ form.word.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="subject" class="block text-sm font-medium text-gray-700">{{ form.subject.label }} *</label>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ form.subject.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="language" class="block text-sm font-medium text-gray-700">{{ form.language.label }} *</label>
+            {{ form.language }}
+            {% if form.language.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ form.language.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Generate Article
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

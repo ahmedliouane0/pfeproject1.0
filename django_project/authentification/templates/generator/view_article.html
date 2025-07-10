@@ -1,0 +1,878 @@
+{% extends 'base.html' %}
+
+{% block title %}View Article{% endblock %}
+{% block content %}
+<script src="https://cdn.tiny.cloud/1/lutdgsvofecmyd6o6eap56ke3k2pz1xkq8k6jwha9v16a3ib/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <style>
+      .underline-green {
+        text-decoration: underline;
+        text-decoration-color: #22c55e;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 2px;
+        padding-bottom: 2px;
+        display: inline-block;
+        position: relative;
+      }
+      .underline-red {
+        text-decoration: underline;
+        text-decoration-color: #ef4444;
+        text-decoration-thickness: 2px;
+        text-underline-offset: 2px;
+        padding-bottom: 2px;
+        display: inline-block;
+        position: relative;
+      }
+
+      .translation-tooltip {
+        position: fixed;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 12px;
+        z-index: 99999;
+        min-width: 250px;
+        max-width: 300px;
+        display: none;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      .translation-tooltip::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .translation-tooltip::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 2px;
+    }
+    
+    .translation-tooltip::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+    
+    .translation-tooltip::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+
+      .tooltip-content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .original-text {
+        color: #4b5563;
+        font-size: 0.875rem;
+        padding-bottom: 4px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .translated-text {
+        color: #1f2937;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      .replace-button {
+        background-color: #22c55e;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+      }
+
+      .replace-button:hover {
+        background-color: #16a34a;
+      }
+
+      .error-text {
+        color: #dc2626;
+        font-weight: 500;
+      }
+
+      .error-message {
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+
+      .loading {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #4b5563;
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e5e7eb;
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .notification-enter {
+        animation: slide-in 0.3s ease-out forwards;
+      }
+      
+      .notification-exit {
+        animation: fade-out 0.3s ease-in forwards;
+      }
+      
+      @keyframes slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      
+      @keyframes fade-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+    </style>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-md">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <a href="{% url 'generate_article' %}" class="inline-flex items-center text-gray-600 hover:text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
+                </div>
+
+                <h2 class="text-xl font-bold mb-4">Article: {{ article.subject }}</h2>
+                <div class="text-sm text-gray-600 mb-4">
+                    <p>Keyword: {{ article.keyword }}</p>
+                    <p>Subject: {{ article.subject }}</p>
+                    <p>Language: {{ article.source_language }}</p>
+                </div>
+                
+                <!-- Store article language as data attribute for JavaScript -->
+                <div id="article-meta" data-article-lang="{{ article.source_language|lower }}" data-article-id="{{ article.id }}" class="hidden"></div>
+
+                <div class="mb-4 flex space-x-2">
+                    <a href="{% url 'download_article' article.id %}" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" title="Download Article">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </a>
+                    <button onclick="saveArticleContent()" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Save Changes">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                    </button>
+                    <button id="translate-all-btn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" title="Translate All Different Language Words">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                        </svg>
+                        Translate All
+                    </button>
+                </div>
+                
+                <div id="article-editor">
+                    <textarea id="edited_content" name="edited_content">
+                        {{ article_content|linebreaks }}
+                    </textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation tooltip - positioned outside iframe -->
+        <div id="translation-tooltip" class="translation-tooltip">
+            <div class="tooltip-content">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let articleLang = document.getElementById('article-meta')?.dataset.articleLang || 'en';
+        let currentBookmark = null;
+        let currentEditor = null;
+
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#edited_content',
+            menubar: false,
+            plugins: 'link lists code',
+            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link | code',
+            height: 500,
+            branding: false,
+            content_style: `
+                .underline-green {
+                    text-decoration: underline;
+                    text-decoration-color: #22c55e;
+                    text-decoration-thickness: 2px;
+                    text-underline-offset: 2px;
+                    display: inline-block;
+                    position: relative;
+                    background-color: rgba(34, 197, 94, 0.1);
+                    padding: 0 2px;
+                    border-radius: 2px;
+                }
+                .underline-red {
+                    text-decoration: underline;
+                    text-decoration-color: #ef4444;
+                    text-decoration-thickness: 2px;
+                    text-underline-offset: 2px;
+                    display: inline-block;
+                    position: relative;
+                }
+            `,
+            extended_valid_elements: 'span[class|title|style]',
+            valid_classes: {
+                'span': 'underline-green underline-red translated-word different-language-word'
+            },
+            valid_children: '+body[style]',
+            setup: function(editor) {
+                editor.on('init', function() {
+                    window.articleEditor = editor;
+                    console.log('TinyMCE initialized');
+                    
+                    // Detect different language words after initialization
+                    detectDifferentLanguageWords(editor);
+                });
+
+                // Add selection change handler for word translation
+                editor.on('mouseup keyup', function(e) {
+                    // Small delay to ensure selection is finalized
+                    setTimeout(() => {
+                        const selectedText = editor.selection.getContent({format: 'text'}).trim();
+                        if (selectedText && selectedText.length > 0) {
+                            console.log('Selected text:', selectedText);
+                            handleWordSelection(selectedText, editor, e);
+                        } else {
+                            hideTooltip();
+                        }
+                    }, 10);
+                });
+
+                // Hide tooltip when clicking elsewhere
+                editor.on('click', function(e) {
+                    const selectedText = editor.selection.getContent({format: 'text'}).trim();
+                    if (!selectedText) {
+                        hideTooltip();
+                    }
+                });
+            }
+        });
+        document.getElementById('translate-all-btn')?.addEventListener('click', translateAllDifferentLanguageWords);
+
+
+        // Function to get tooltip element
+        function getTooltip() {
+            return document.getElementById('translation-tooltip');
+        }
+
+        // Function to hide tooltip
+        function hideTooltip() {
+            const tooltip = getTooltip();
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // Function to position tooltip based on selection
+        function positionTooltip(editor, tooltip) {
+            try {
+                const selection = editor.selection;
+                const range = selection.getRng();
+                
+                // Get the iframe element
+                const iframe = editor.getContainer().querySelector('iframe');
+                if (!iframe) return;
+
+                // Get iframe position relative to viewport
+                const iframeRect = iframe.getBoundingClientRect();
+                
+                // Get selection rectangle within iframe
+                const selectionRect = range.getBoundingClientRect();
+                
+                // Show tooltip temporarily to get its dimensions
+                tooltip.style.display = 'block';
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.position = 'fixed';
+                const tooltipRect = tooltip.getBoundingClientRect();
+                tooltip.style.visibility = 'visible';
+                
+                // Calculate absolute position on page, accounting for scroll
+                const absoluteLeft = iframeRect.left + selectionRect.left;
+                const absoluteTop = iframeRect.top + selectionRect.bottom;
+                
+                // Get viewport dimensions
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Calculate optimal position with better edge detection
+                let finalLeft = absoluteLeft;
+                let finalTop = absoluteTop + 8; // Small gap below selection
+                let positioning = 'below'; // Track where we're positioning
+                
+                // Horizontal positioning adjustments
+                if (finalLeft + tooltipRect.width > viewportWidth - 10) {
+                    // If tooltip extends beyond right edge, align to right edge of viewport
+                    finalLeft = viewportWidth - tooltipRect.width - 10;
+                }
+                if (finalLeft < 10) {
+                    // If tooltip extends beyond left edge, align to left edge with margin
+                    finalLeft = 10;
+                }
+                
+                // Vertical positioning adjustments - this is the key fix
+                const spaceBelow = viewportHeight - absoluteTop;
+                const spaceAbove = iframeRect.top + selectionRect.top;
+                
+                if (spaceBelow < tooltipRect.height + 20) { // Not enough space below
+                    if (spaceAbove > tooltipRect.height + 20) { // Enough space above
+                        // Position above the selection
+                        finalTop = iframeRect.top + selectionRect.top - tooltipRect.height - 8;
+                        positioning = 'above';
+                    } else {
+                        // Not enough space above or below - position in best available space
+                        if (spaceBelow > spaceAbove) {
+                            // More space below, position at bottom with max available height
+                            finalTop = absoluteTop + 8;
+                            const maxHeight = Math.max(100, spaceBelow - 30);
+                            tooltip.style.maxHeight = maxHeight + 'px';
+                            tooltip.style.overflowY = 'auto';
+                            positioning = 'below-constrained';
+                        } else {
+                            // More space above, position above with max available height
+                            const maxHeight = Math.max(100, spaceAbove - 30);
+                            finalTop = Math.max(10, spaceAbove - maxHeight - 8);
+                            tooltip.style.maxHeight = maxHeight + 'px';
+                            tooltip.style.overflowY = 'auto';
+                            positioning = 'above-constrained';
+                        }
+                    }
+                } else {
+                    // Enough space below - remove any height constraints from previous positioning
+                    tooltip.style.maxHeight = '';
+                    tooltip.style.overflowY = '';
+                }
+                
+                // Ensure tooltip doesn't go above viewport
+                if (finalTop < 10) {
+                    finalTop = 10;
+                }
+                
+                // Ensure tooltip doesn't go below viewport
+                if (finalTop + tooltipRect.height > viewportHeight - 10) {
+                    finalTop = Math.max(10, viewportHeight - tooltipRect.height - 10);
+                }
+                
+                // Set final position
+                tooltip.style.left = `${finalLeft}px`;
+                tooltip.style.top = `${finalTop}px`;
+                tooltip.style.position = 'fixed';
+                
+                // Add a data attribute to track positioning for debugging
+                tooltip.setAttribute('data-positioning', positioning);
+                
+                console.log('Tooltip positioned:', {
+                    positioning,
+                    finalLeft,
+                    finalTop,
+                    tooltipSize: { width: tooltipRect.width, height: tooltipRect.height },
+                    viewport: { width: viewportWidth, height: viewportHeight },
+                    spaces: { above: spaceAbove, below: spaceBelow }
+                });
+                
+            } catch (error) {
+                console.error('Error positioning tooltip:', error);
+                // Fallback positioning - center of viewport
+                tooltip.style.position = 'fixed';
+                tooltip.style.left = '50%';
+                tooltip.style.top = '50%';
+                tooltip.style.transform = 'translate(-50%, -50%)';
+                tooltip.style.display = 'block';
+            }
+        }
+
+        // Function to handle word selection and translation
+        async function handleWordSelection(selectedText, editor, event) {
+            const tooltip = getTooltip();
+            if (!tooltip) return;
+
+            // Store editor and bookmark for later use
+            currentEditor = editor;
+            currentBookmark = editor.selection.getBookmark(2, true);
+
+            // Position and show loading tooltip
+            positionTooltip(editor, tooltip);
+            
+            tooltip.innerHTML = `
+                <div class="tooltip-content">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Translating "${selectedText}"...</span>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const articleMeta = document.getElementById('article-meta');
+                const articleLang = articleMeta?.dataset.articleLang || 'en';
+
+                const response = await fetch('/translate_simple/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        text: selectedText,
+                        target_language: articleLang,
+                        entities: [{
+                            text: selectedText
+                        }]
+                    })
+                });
+
+                if (!response.ok) throw new Error('Translation failed');
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Translation failed');
+                }
+
+                if (!data.translation_results || data.translation_results.length === 0) {
+                    throw new Error('No translation results received');
+                }
+
+                const translation = data.translation_results[0].translated_text;
+                const detectedLang = data.translation_results[0].detected_language;
+                
+                if (!translation) {
+                    throw new Error('Empty translation received');
+                }
+
+                const buttonId = 'replace-with-translation-' + Date.now();
+
+                tooltip.innerHTML = `
+                    <div class="tooltip-content">
+                        <span class="original-text">${selectedText} (${detectedLang})</span>
+                        <span class="translated-text">${translation}</span>
+                        <button id="${buttonId}" class="replace-button">
+                            Replace with translation
+                        </button>
+                    </div>
+                `;
+
+                // Add click handler for replace button
+                const replaceButton = document.getElementById(buttonId);
+                if (replaceButton) {
+                    replaceButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        replaceWithTranslation(selectedText, translation, articleLang);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Translation error:', error);
+                tooltip.innerHTML = `
+                    <div class="tooltip-content">
+                        <span class="error-text">Error translating</span>
+                        <span class="error-message">${error.message}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Function to replace selected text with translation
+        function replaceWithTranslation(originalText, translation, articleLang) {
+            if (!currentEditor || !currentBookmark) return;
+
+            try {
+                // Restore the original selection
+                currentEditor.selection.moveToBookmark(currentBookmark);
+                
+                // Use TinyMCE's transact for undo/redo support
+                currentEditor.undoManager.transact(function() {
+                    const currentSelection = currentEditor.selection.getContent();
+                    console.log('Current selection before replace:', currentSelection);
+                    
+                    if (currentSelection && currentSelection.trim() !== '') {
+                        // Check if the selection is inside a span
+                        const selectedNode = currentEditor.selection.getNode();
+                        const parentSpan = selectedNode.closest ? selectedNode.closest('span') : null;
+                        
+                        if (parentSpan && parentSpan.classList) {
+                            if (parentSpan.classList.contains('underline-green')) {
+                                // If inside a green span, replace the parent span's content
+                                parentSpan.textContent = translation;
+                                parentSpan.title = `Translated to ${articleLang}`;
+                            } else if (parentSpan.classList.contains('underline-red')) {
+                                // If inside a red span, replace with green span
+                                parentSpan.className = 'underline-green';
+                                parentSpan.textContent = translation;
+                                parentSpan.title = `Translated to ${articleLang}`;
+                            } else {
+                                // If not inside a span, create a new one
+                                currentEditor.selection.setContent(`<span class="underline-green" title="Translated to ${articleLang}">${translation}</span>`);
+                            }
+                        } else {
+                            // If not inside a span, create a new one
+                            currentEditor.selection.setContent(`<span class="underline-green" title="Translated to ${articleLang}">${translation}</span>`);
+                        }
+                    } else {
+                        // Fallback: insert at current cursor position with green underline
+                        currentEditor.insertContent(`<span class="underline-green" title="Translated to ${articleLang}">${translation}</span>`);
+                    }
+                });
+                
+                // Hide tooltip
+                hideTooltip();
+                
+                // Show success notification
+                showNotification(`"${originalText}" replaced with "${translation}"`, 'success');
+                
+                // Focus back to editor
+                currentEditor.focus();
+                
+            } catch (error) {
+                console.error('Error replacing text:', error);
+                showNotification('Error replacing text. Please try again.', 'error');
+            }
+        }
+
+        // Hide tooltip when clicking outside
+        document.addEventListener('click', function(e) {
+            const tooltip = getTooltip();
+            if (tooltip && !tooltip.contains(e.target)) {
+                hideTooltip();
+            }
+        });
+
+        // Helper functions
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showProcessingNotification(message) {
+            const existingNotification = document.getElementById('translation-processing-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notificationDiv = document.createElement('div');
+            notificationDiv.id = 'translation-processing-notification';
+            notificationDiv.className = 'fixed top-4 right-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-lg z-50';
+            notificationDiv.setAttribute('role', 'alert');
+            notificationDiv.innerHTML = `
+                <div class="flex">
+                    <div class="py-1 mr-2">
+                        <svg class="animate-spin w-5 h-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-bold">Processing</p>
+                        <p class="text-sm">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notificationDiv);
+        }
+
+        function showNotification(message, type = 'success') {
+            const processingNotification = document.getElementById('translation-processing-notification');
+            if (processingNotification) {
+                processingNotification.remove();
+            }
+
+            let bgColor, borderColor, textColor, icon;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100';
+                    borderColor = 'border-green-500';
+                    textColor = 'text-green-700';
+                    icon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100';
+                    borderColor = 'border-red-500';
+                    textColor = 'text-red-700';
+                    icon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-yellow-100';
+                    borderColor = 'border-yellow-500';
+                    textColor = 'text-yellow-700';
+                    icon = '<svg class="w-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                    break;
+                case 'info':
+                    bgColor = 'bg-blue-100';
+                    borderColor = 'border-blue-500';
+                    textColor = 'text-blue-700';
+                    icon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    break;
+            }
+
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `fixed top-4 right-4 ${bgColor} border-l-4 ${borderColor} ${textColor} p-4 rounded shadow-lg z-50 notification-enter`;
+            notificationDiv.setAttribute('role', 'alert');
+            notificationDiv.innerHTML = `
+                <div class="flex">
+                    <div class="py-1 mr-2">
+                        ${icon}
+                    </div>
+                    <div>
+                        <p class="font-bold">${type.charAt(0).toUpperCase() + type.slice(1)}</p>
+                        <p class="text-sm">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notificationDiv);
+            
+            setTimeout(() => {
+                notificationDiv.classList.add('notification-exit');
+                setTimeout(() => notificationDiv.remove(), 300);
+            }, 4000);
+        }
+
+        window.saveArticleContent = async function() {
+            const editor = tinymce.get('edited_content');
+            if (!editor) return;
+
+            showProcessingNotification('Saving changes...');
+
+            const articleMeta = document.getElementById('article-meta');
+            const articleId = articleMeta ? articleMeta.dataset.articleId : null;
+            const csrftoken = getCookie('csrftoken');
+
+            try {
+                const response = await fetch('/update_article_content/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        article_id: articleId,
+                        content: editor.getContent()
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Article saved successfully', 'success');
+                } else {
+                    throw new Error('Failed to save article');
+                }
+            } catch (error) {
+                showNotification('Error saving article: ' + error.message, 'error');
+            }
+        };
+
+        // Function to detect words in different languages
+        async function detectDifferentLanguageWords(editor) {
+            const articleMeta = document.getElementById('article-meta');
+            const articleLang = articleMeta?.dataset.articleLang || 'en';
+            
+            showProcessingNotification('Detecting words from other languages...');
+
+            try {
+                const content = editor.getContent();
+
+                const response = await fetch('/detect/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        content: content,
+                        article_language: articleLang
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Detection failed');
+                }
+
+                const data = await response.json();
+                
+                const processingNotification = document.getElementById('translation-processing-notification');
+                if (processingNotification) processingNotification.remove();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Detection failed');
+                }
+                
+                const wordsToMark = data.different_language_words;
+
+                if (!wordsToMark || wordsToMark.length === 0) {
+                    showNotification('No words from different languages were detected.', 'info');
+                    return;
+                }
+
+                editor.undoManager.transact(function() {
+                    const wordMap = new Map();
+                    const wordsForRegex = [];
+
+                    wordsToMark.forEach(item => {
+                        const escapedWord = item.word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                        wordMap.set(item.word, item.detected_language);
+                        wordsForRegex.push(escapedWord);
+                    });
+                    
+                    if (wordsForRegex.length === 0) return;
+
+                    const regex = new RegExp(`\\b(${wordsForRegex.join('|')})\\b`, 'g');
+
+                    function walkAndReplace(node) {
+                        if (node.nodeType === 3) { 
+                            const parent = node.parentNode;
+                            if (parent.nodeName === 'SCRIPT' || parent.nodeName === 'STYLE' || parent.closest('.underline-red, .underline-green')) {
+                                return;
+                            }
+
+                            const text = node.nodeValue;
+                            if (regex.test(text)) {
+                                const fragment = editor.getDoc().createDocumentFragment();
+                                let lastIndex = 0;
+                                let match;
+                                regex.lastIndex = 0; 
+
+                                while ((match = regex.exec(text)) !== null) {
+                                    if (match.index > lastIndex) {
+                                        fragment.appendChild(editor.getDoc().createTextNode(text.substring(lastIndex, match.index)));
+                                    }
+                                    
+                                    const matchedWord = match[0];
+                                    const span = editor.getDoc().createElement('span');
+                                    span.className = 'underline-red';
+                                    span.title = `Detected language: ${wordMap.get(matchedWord)}`;
+                                    span.textContent = matchedWord;
+                                    fragment.appendChild(span);
+                                    
+                                    lastIndex = regex.lastIndex;
+                                }
+
+                                if (lastIndex < text.length) {
+                                    fragment.appendChild(editor.getDoc().createTextNode(text.substring(lastIndex)));
+                                }
+                                
+                                parent.replaceChild(fragment, node);
+                            }
+                        } else if (node.nodeType === 1 && node.childNodes) { 
+                            
+                             Array.from(node.childNodes).forEach(child => walkAndReplace(child));
+                        }
+                    }
+
+                    walkAndReplace(editor.getBody());
+                });
+
+                showNotification(`Found ${wordsToMark.length} words in different languages and marked them in red.`, 'info');
+                
+            } catch (error) {
+                console.error('Language detection error:', error);
+                const processingNotification = document.getElementById('translation-processing-notification');
+                if (processingNotification) processingNotification.remove();
+                showNotification('Error detecting different language words: ' + error.message, 'error');
+            }
+        }
+
+        async function translateAllDifferentLanguageWords() {
+            const editor = tinymce.get('edited_content');
+            if (!editor) return;
+
+            const articleMeta = document.getElementById('article-meta');
+            const articleLang = articleMeta?.dataset.articleLang || 'en';
+
+            const redUnderlinedWords = editor.getBody().querySelectorAll('.underline-red');
+            if (redUnderlinedWords.length === 0) {
+                showNotification('No different language words found to translate', 'info');
+                return;
+            }
+
+            showProcessingNotification(`Translating ${redUnderlinedWords.length} words...`);
+
+            try {
+                const batchSize = 5;
+                for (let i = 0; i < redUnderlinedWords.length; i += batchSize) {
+                    const batch = Array.from(redUnderlinedWords).slice(i, i + batchSize);
+                    const words = batch.map(span => span.textContent);
+
+                    const response = await fetch('/translate_simple/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            text: words.join(' '),
+                            target_language: articleLang,
+                            entities: words.map(text => ({ text }))
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Translation failed');
+
+                    const data = await response.json();
+                    if (!data.success || !data.translation_results) {
+                        throw new Error(data.message || 'Translation failed');
+                    }
+
+                    data.translation_results.forEach((result, index) => {
+                        const originalSpan = batch[index];
+                        if (originalSpan && result.translated_text) {
+                            originalSpan.className = 'underline-green';
+                            originalSpan.textContent = result.translated_text;
+                            originalSpan.title = `Translated to ${articleLang}`;
+                        }
+                    });
+
+                    if (i + batchSize < redUnderlinedWords.length) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                }
+
+                showNotification(`Successfully translated ${redUnderlinedWords.length} words`, 'success');
+            } catch (error) {
+                console.error('Error translating words:', error);
+                showNotification('Error translating words: ' + error.message, 'error');
+            }
+        }
+    });
+    </script>
+    
+{% endblock %}

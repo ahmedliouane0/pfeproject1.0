@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Account</title>
+    <style>
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .warning {
+            color: red;
+            margin-bottom: 20px;
+        }
+        .delete-btn {
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .cancel-btn {
+            background-color: gray;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Delate Account</h2>
+        <p class="warning">Warning: All your data will be permanently deleted.</p>
+        
+        <form method="post" action="{% url 'delete_account_confirm' %}">
+            {% csrf_token %}
+            <button type="submit" class="delete-btn">Delete My Account</button>
+            <a href="{% url 'account' %}" class="cancel-btn">Cancel</a>
+        </form>
+        
+    </div>
+</body>
+</html>
