@@ -26,7 +26,7 @@ Uvicorn
 🛠️ Installation
 
 Clone the repository
-bashgit clone https://github.com/yourusername/m2m100-translation-service.git
+bashgit clone https://github.com/ahmedliouane0/pfeproject1.0.git
 cd m2m100-translation-service
 
 Create a virtual environment
